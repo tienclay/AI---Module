@@ -16,28 +16,17 @@ from utils.log import logger
 ## Router for Serving Assistants
 ######################################################
 
-assistants_router = APIRouter(prefix=endpoints.ASSISTANTS, tags=["Assistants"])
+assistants_router = APIRouter(prefix=endpoints.AGENT_ASSISTANTS, tags=["Agent-Assistants"])
 AssistantType = Literal["AUTO_PDF", "RAG_PDF"]
 
 
-def get_assistant(
-    assistant_type: AssistantType,
-    run_id: Optional[str] = None,
-    user_id: Optional[str] = None,
-):
-    """Return the assistant"""
-
-    if assistant_type == "AUTO_PDF":
-        return get_autonomous_pdf_assistant(run_id=run_id, user_id=user_id)
-    elif assistant_type == "RAG_PDF":
-        return get_rag_pdf_assistant(run_id=run_id, user_id=user_id)
 
 def get_agent_assistant(
     assistant_type: AssistantType,
     run_id: Optional[str] = None,
     user_id: Optional[str] = None,
     agent_collection_name: str = None,
-    urls: List[str] = None,
+    urls: Optional[List[str]] = None,
 ):
     """Return the assistant"""
 
@@ -48,29 +37,16 @@ def get_agent_assistant(
 
 
 
-
-class LoadKnowledgeBaseRequest(BaseModel):
-    assistant: AssistantType = "RAG_PDF"
-
 class LoadAgentKnowledgeBaseRequest(BaseModel):
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: str
     urls: List[str]
 
 
-@assistants_router.post("/load-knowledge-base")
-def load_knowledge_base(body: LoadKnowledgeBaseRequest):
-    """Loads the knowledge base for an Assistant"""
-
-    assistant = get_assistant(assistant_type=body.assistant)
-    if assistant.knowledge_base:
-        assistant.knowledge_base.load(recreate=False)
-    return {"message": "Knowledge Base Loaded"}
 
 @assistants_router.post("/load-agent-knowledge-base")
 def load_agent_knowledge_base(body: LoadAgentKnowledgeBaseRequest):
     """Loads the knowledge base for an Assistant"""
-
     assistant = get_agent_assistant(assistant_type=body.assistant,
                                     agent_collection_name=body.agent_collection_name,
                                     urls=body.urls
@@ -84,6 +60,7 @@ def load_agent_knowledge_base(body: LoadAgentKnowledgeBaseRequest):
 class CreateRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
+    agent_collection_name: Optional[str] = None
 
 
 class CreateRunResponse(BaseModel):
@@ -95,10 +72,12 @@ class CreateRunResponse(BaseModel):
 @assistants_router.post("/create", response_model=CreateRunResponse)
 def create_assistant_run(body: CreateRunRequest):
     """Create a new Assistant run and returns the run_id"""
-
+    print(body)
     logger.debug(f"CreateRunRequest: {body}")
-    assistant: Assistant = get_assistant(assistant_type=body.assistant, user_id=body.user_id)
-
+    assistant: Assistant = get_agent_assistant(assistant_type=body.assistant, 
+                                               user_id=body.user_id,
+                                               agent_collection_name=body.agent_collection_name
+                                               )
     # create_run() will log the run in the database and return the run_id
     # which is returned to the frontend to retrieve the run later
     run_id: Optional[str] = assistant.create_run()
@@ -123,6 +102,7 @@ class ChatRequest(BaseModel):
     stream: bool = True
     run_id: Optional[str] = None
     user_id: Optional[str] = None
+    agent_collection_name: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
 
 
@@ -131,9 +111,17 @@ def chat(body: ChatRequest):
     """Sends a message to an Assistant and returns the response"""
 
     logger.debug(f"ChatRequest: {body}")
-    assistant: Assistant = get_assistant(
-        assistant_type=body.assistant, run_id=body.run_id, user_id=body.user_id
+    
+    print(body)
+    
+    assistant: Assistant = get_agent_assistant(
+        assistant_type=body.assistant, 
+        run_id=body.run_id, 
+        user_id=body.user_id,
+        agent_collection_name=body.agent_collection_name
     )
+    
+    print(1111)
 
     if body.stream:
         return StreamingResponse(
@@ -148,6 +136,7 @@ class ChatHistoryRequest(BaseModel):
     run_id: str
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
+    agent_collection_name: Optional[str] = None
 
 
 @assistants_router.post("/history", response_model=List[Dict[str, Any]])
@@ -155,8 +144,11 @@ def get_chat_history(body: ChatHistoryRequest):
     """Return the chat history for an Assistant run"""
 
     logger.debug(f"ChatHistoryRequest: {body}")
-    assistant: Assistant = get_assistant(
-        assistant_type=body.assistant, run_id=body.run_id, user_id=body.user_id
+    assistant: Assistant = get_agent_assistant(
+        assistant_type=body.assistant, 
+        run_id=body.run_id, 
+        user_id=body.user_id,
+        agent_collection_name=body.agent_collection_name
     )
     # Load the assistant from the database
     assistant.read_from_storage()
@@ -168,6 +160,7 @@ class GetAssistantRunRequest(BaseModel):
     run_id: str
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
+    agent_collection_name: Optional[str] = None
 
 
 @assistants_router.post("/get", response_model=Optional[AssistantRun])
@@ -175,8 +168,11 @@ def get_assistant_run(body: GetAssistantRunRequest):
     """Returns the Assistant run"""
 
     logger.debug(f"GetAssistantRunRequest: {body}")
-    assistant: Assistant = get_assistant(
-        assistant_type=body.assistant, run_id=body.run_id, user_id=body.user_id
+    assistant: Assistant = get_agent_assistant(
+        assistant_type=body.assistant,
+        run_id=body.run_id, 
+        user_id=body.user_id,
+        agent_collection_name=body.agent_collection_name
     )
 
     return assistant.read_from_storage()
@@ -211,6 +207,7 @@ class RenameAssistantRunRequest(BaseModel):
     run_name: str
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
+    agent_collection_name: Optional[str] = None
 
 
 class RenameAssistantRunResponse(BaseModel):
@@ -223,8 +220,11 @@ def rename_assistant(body: RenameAssistantRunRequest):
     """Rename an Assistant run"""
 
     logger.debug(f"RenameAssistantRunRequest: {body}")
-    assistant: Assistant = get_assistant(
-        assistant_type=body.assistant, run_id=body.run_id, user_id=body.user_id
+    assistant: Assistant = get_agent_assistant(
+        assistant_type=body.assistant, 
+        run_id=body.run_id, 
+        user_id=body.user_id,
+        agent_collection_name=body.agent_collection_name
     )
     assistant.rename_run(body.run_name)
 
@@ -238,6 +238,7 @@ class AutoRenameAssistantRunRequest(BaseModel):
     run_id: str
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
+    agent_collection_name: Optional[str] = None
 
 
 class AutoRenameAssistantRunResponse(BaseModel):
@@ -250,8 +251,11 @@ def autorename_assistant(body: AutoRenameAssistantRunRequest):
     """Rename a assistant using the LLM"""
 
     logger.debug(f"AutoRenameAssistantRunRequest: {body}")
-    assistant: Assistant = get_assistant(
-        assistant_type=body.assistant, run_id=body.run_id, user_id=body.user_id
+    assistant: Assistant = get_agent_assistant(
+        assistant_type=body.assistant, 
+        run_id=body.run_id, 
+        user_id=body.user_id,
+        agent_collection_name=body.agent_collection_name
     )
     assistant.auto_rename_run()
 

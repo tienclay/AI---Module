@@ -11,6 +11,8 @@ from ai.knowledge_base import pdf_knowledge_base
 def get_autonomous_pdf_assistant(
     run_id: Optional[str] = None,
     user_id: Optional[str] = None,
+    agent_name: Optional[str] = None,
+
     debug_mode: bool = False,
 ) -> Assistant:
     """Get an Autonomous Assistant with a PDF knowledge base."""
