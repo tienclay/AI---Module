@@ -10,7 +10,7 @@ class AISettings(BaseSettings):
     gpt_4: str = "gpt-4o"
     gpt_4_vision: str = "gpt-4o"
     embedding_model: str = "text-embedding-3-small"
-    default_max_tokens: int = 1024
+    default_max_tokens: int = 2048
     default_temperature: float = 0
 
 
