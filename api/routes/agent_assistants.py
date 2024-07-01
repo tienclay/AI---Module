@@ -27,13 +27,14 @@ def get_agent_assistant(
     user_id: Optional[str] = None,
     agent_collection_name: str = None,
     urls: Optional[List[str]] = None,
+    prompt: str = None,
 ):
     """Return the assistant"""
 
     if assistant_type == "AUTO_PDF":
         return get_autonomous_pdf_assistant(run_id=run_id, user_id=user_id)
     elif assistant_type == "RAG_PDF":
-        return get_agent_rag_pdf_assistant(run_id=run_id, user_id=user_id, agent_collection_name=agent_collection_name, urls=urls)
+        return get_agent_rag_pdf_assistant(run_id=run_id, user_id=user_id, agent_collection_name=agent_collection_name, urls=urls, prompt=prompt)
 
 
 
@@ -41,6 +42,7 @@ class LoadAgentKnowledgeBaseRequest(BaseModel):
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: str
     urls: List[str]
+    prompt: str
 
 
 
@@ -49,7 +51,8 @@ def load_agent_knowledge_base(body: LoadAgentKnowledgeBaseRequest):
     """Loads the knowledge base for an Assistant"""
     assistant = get_agent_assistant(assistant_type=body.assistant,
                                     agent_collection_name=body.agent_collection_name,
-                                    urls=body.urls
+                                    urls=body.urls,
+                                    prompt=body.prompt
                                     )
     if assistant.knowledge_base:
         assistant.knowledge_base.load(recreate=False)
@@ -61,22 +64,24 @@ class CreateRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
+    prompt: str
 
 
 class CreateRunResponse(BaseModel):
     run_id: str
     user_id: Optional[str] = None
     chat_history: List[Dict[str, Any]]
+    
 
 
 @assistants_router.post("/create", response_model=CreateRunResponse)
 def create_assistant_run(body: CreateRunRequest):
     """Create a new Assistant run and returns the run_id"""
-    print(body)
     logger.debug(f"CreateRunRequest: {body}")
     assistant: Assistant = get_agent_assistant(assistant_type=body.assistant, 
                                                user_id=body.user_id,
-                                               agent_collection_name=body.agent_collection_name
+                                               agent_collection_name=body.agent_collection_name,
+                                               prompt=body.prompt
                                                )
     # create_run() will log the run in the database and return the run_id
     # which is returned to the frontend to retrieve the run later
@@ -88,7 +93,7 @@ def create_assistant_run(body: CreateRunRequest):
     return CreateRunResponse(
         run_id=run_id,
         user_id=assistant.user_id,
-        chat_history=assistant.memory.get_chat_history(),
+        chat_history=assistant.memory.get_chat_history(),        
     )
 
 
@@ -103,6 +108,7 @@ class ChatRequest(BaseModel):
     run_id: Optional[str] = None
     user_id: Optional[str] = None
     agent_collection_name: Optional[str] = None
+    prompt: str
     assistant: AssistantType = "RAG_PDF"
 
 
@@ -118,10 +124,10 @@ def chat(body: ChatRequest):
         assistant_type=body.assistant, 
         run_id=body.run_id, 
         user_id=body.user_id,
-        agent_collection_name=body.agent_collection_name
+        agent_collection_name=body.agent_collection_name,
+        prompt=body.prompt
     )
     
-    print(1111)
 
     if body.stream:
         return StreamingResponse(
@@ -137,6 +143,7 @@ class ChatHistoryRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
+    prompt: str
 
 
 @assistants_router.post("/history", response_model=List[Dict[str, Any]])
@@ -148,7 +155,8 @@ def get_chat_history(body: ChatHistoryRequest):
         assistant_type=body.assistant, 
         run_id=body.run_id, 
         user_id=body.user_id,
-        agent_collection_name=body.agent_collection_name
+        agent_collection_name=body.agent_collection_name,
+        prompt=body.prompt
     )
     # Load the assistant from the database
     assistant.read_from_storage()
@@ -161,6 +169,8 @@ class GetAssistantRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
+    prompt: str
+    
 
 
 @assistants_router.post("/get", response_model=Optional[AssistantRun])
@@ -172,7 +182,8 @@ def get_assistant_run(body: GetAssistantRunRequest):
         assistant_type=body.assistant,
         run_id=body.run_id, 
         user_id=body.user_id,
-        agent_collection_name=body.agent_collection_name
+        agent_collection_name=body.agent_collection_name,
+        prompt=body.prompt
     )
 
     return assistant.read_from_storage()
@@ -208,6 +219,7 @@ class RenameAssistantRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
+    prompt: str
 
 
 class RenameAssistantRunResponse(BaseModel):
@@ -224,7 +236,8 @@ def rename_assistant(body: RenameAssistantRunRequest):
         assistant_type=body.assistant, 
         run_id=body.run_id, 
         user_id=body.user_id,
-        agent_collection_name=body.agent_collection_name
+        agent_collection_name=body.agent_collection_name,
+        prompt=body.prompt
     )
     assistant.rename_run(body.run_name)
 
@@ -239,6 +252,7 @@ class AutoRenameAssistantRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
+    prompt: str
 
 
 class AutoRenameAssistantRunResponse(BaseModel):
@@ -255,7 +269,8 @@ def autorename_assistant(body: AutoRenameAssistantRunRequest):
         assistant_type=body.assistant, 
         run_id=body.run_id, 
         user_id=body.user_id,
-        agent_collection_name=body.agent_collection_name
+        agent_collection_name=body.agent_collection_name,
+        prompt=body.prompt
     )
     assistant.auto_rename_run()
 
