@@ -14,7 +14,10 @@ def load_agent_knowledge_base(agent_collection_name, urls):
     print(urls)
     pdf_knowledge_base = CombinedKnowledgeBase(
     sources=[
-        # WebsiteKnowledgeBase(urls=['https://phi-public.s3.amazonaws.com/recipes/ThaiRecipes.pdf']),
+        WebsiteKnowledgeBase(urls=["https://codelight.co/index.html"]),
+        WebsiteKnowledgeBase(urls=["https://codelight.co/about.html"]),
+        WebsiteKnowledgeBase(urls=["https://codelight.co/wip-program.html"]),
+        WebsiteKnowledgeBase(urls=["https://codelight.co/our-projects.html"]),
         PDFUrlKnowledgeBase(urls=urls),
     ],
     vector_db=PgVector2(

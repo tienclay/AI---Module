@@ -160,7 +160,8 @@ def get_agent_rag_pdf_assistant(
     user_id: Optional[str] = None,
     debug_mode: bool = False,
     agent_collection_name: str = 'codelight_agent',
-    urls: List[str] = ["https://codelight.co/index.html"],
+    website_urls: List[str] = [],
+    pdf_urls: List[str] = [],
     prompt: str = None,
 ) -> Assistant:
     """Get a RAG Assistant with a PDF knowledge base."""
@@ -175,7 +176,7 @@ def get_agent_rag_pdf_assistant(
             temperature=ai_settings.default_temperature,
         ),
         storage=pdf_assistant_storage,
-        knowledge_base=load_agent_knowledge_base(agent_collection_name,urls),
+        knowledge_base=load_agent_knowledge_base(agent_collection_name,website_urls, pdf_urls),
         # This setting adds references from the knowledge_base to the user prompt
         add_references_to_prompt=True,
         # This setting adds the last 6 messages from the chat history to the API call

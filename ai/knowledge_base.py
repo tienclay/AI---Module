@@ -8,16 +8,12 @@ from phi.vectordb.pgvector import PgVector2
 from ai.settings import ai_settings
 from db.session import db_url
 
-def load_agent_knowledge_base(agent_collection_name, urls):
+def load_agent_knowledge_base(agent_collection_name, website_urls, pdf_urls):
     """Loads the knowledge base for an Assistant"""
-
-    print(agent_collection_name)
-    print(urls)
-
     pdf_knowledge_base = CombinedKnowledgeBase(
     sources=[
-        # WebsiteKnowledgeBase(urls=['https://phi-public.s3.amazonaws.com/recipes/ThaiRecipes.pdf']),
-        PDFUrlKnowledgeBase(urls=urls if urls else []),
+        WebsiteKnowledgeBase(urls=website_urls if website_urls else []),
+        PDFUrlKnowledgeBase(urls=pdf_urls if pdf_urls else []),
     ],
     vector_db=PgVector2(
         db_url=db_url,

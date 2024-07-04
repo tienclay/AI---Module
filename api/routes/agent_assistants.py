@@ -26,22 +26,24 @@ def get_agent_assistant(
     run_id: Optional[str] = None,
     user_id: Optional[str] = None,
     agent_collection_name: str = None,
-    urls: Optional[List[str]] = None,
+    website_urls: Optional[List[str]] = None,
+    pdf_urls: Optional[List[str]] = None,
     prompt: str = None,
 ):
     """Return the assistant"""
-
+    print(website_urls)
     if assistant_type == "AUTO_PDF":
         return get_autonomous_pdf_assistant(run_id=run_id, user_id=user_id)
     elif assistant_type == "RAG_PDF":
-        return get_agent_rag_pdf_assistant(run_id=run_id, user_id=user_id, agent_collection_name=agent_collection_name, urls=urls, prompt=prompt)
+        return get_agent_rag_pdf_assistant(run_id=run_id, user_id=user_id, agent_collection_name=agent_collection_name, website_urls=website_urls,pdf_urls=pdf_urls,prompt=prompt)
 
 
 
 class LoadAgentKnowledgeBaseRequest(BaseModel):
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: str
-    urls: List[str]
+    website_urls: List[str]
+    pdf_urls: List[str]
     prompt: str
 
 
@@ -49,9 +51,11 @@ class LoadAgentKnowledgeBaseRequest(BaseModel):
 @assistants_router.post("/load-agent-knowledge-base")
 def load_agent_knowledge_base(body: LoadAgentKnowledgeBaseRequest):
     """Loads the knowledge base for an Assistant"""
+    print(body)
     assistant = get_agent_assistant(assistant_type=body.assistant,
                                     agent_collection_name=body.agent_collection_name,
-                                    urls=body.urls,
+                                    website_urls=body.website_urls,
+                                    pdf_urls=body.pdf_urls,
                                     prompt=body.prompt
                                     )
     if assistant.knowledge_base:
