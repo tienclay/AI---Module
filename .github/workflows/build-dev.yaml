@@ -3,7 +3,7 @@ name: "Dev Deployment"
 on:
   push:
     branches:
-      - dev
+      - feat/agent-ai-module
 
 env:
   NAME: blox3-v1-prod
