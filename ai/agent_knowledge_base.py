@@ -10,8 +10,6 @@ from db.session import db_url
 
 def load_agent_knowledge_base(agent_collection_name, urls):
     """Loads the knowledge base for an Assistant"""
-    print(agent_collection_name)
-    print(urls)
     pdf_knowledge_base = CombinedKnowledgeBase(
     sources=[
         WebsiteKnowledgeBase(urls=["https://codelight.co/index.html"]),

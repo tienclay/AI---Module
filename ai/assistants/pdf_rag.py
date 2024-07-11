@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Any
 
 from phi.assistant import Assistant
 from phi.llm.openai import OpenAIChat
@@ -34,7 +34,7 @@ def get_rag_pdf_assistant(
         # monitoring=True,
         debug_mode=debug_mode,
         description="""
-    I have uploaded a CV file in the data directory. Please parse the CV and extract the required details to return a fully populated ParseCvResponseDto object. Follow these detailed steps:
+I have uploaded a CV file in the data directory. Please parse the CV and extract the required details to return a fully populated ParseCvResponseDto object. Follow these detailed steps:
 
 Load the CV file: Access the file from the data directory.
 Extract Personal Information:
@@ -162,7 +162,7 @@ def get_agent_rag_pdf_assistant(
     agent_collection_name: str = 'codelight_agent',
     website_urls: List[str] = [],
     pdf_urls: List[str] = [],
-    prompt: str = None,
+    property: Any = None,
 ) -> Assistant:
     """Get a RAG Assistant with a PDF knowledge base."""
 
@@ -184,8 +184,10 @@ def get_agent_rag_pdf_assistant(
         # Enable monitoring on phidata.app
         # monitoring=True,
         debug_mode=debug_mode,
-        description=prompt,
-        extra_instructions=[
-        ],
+        prompt=getattr(property, 'prompt', None),
+        description=getattr(property, 'description', None),
+        extra_instructions=getattr(property, 'extra_instructions', None),
+        instructions=getattr(property, 'instructions', None),
+        expected_output=getattr(property, 'expected_output', None),
         assistant_data={"assistant_type": "rag"},
     )

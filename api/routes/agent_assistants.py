@@ -1,10 +1,8 @@
-from typing import Generator, Optional, List, Dict, Any, Literal
-
+from typing import Generator, Optional, List, Dict, Any, Literal, Tuple, Type
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from phi.assistant import Assistant, AssistantRun
 from pydantic import BaseModel
-
 from api.routes.endpoints import endpoints
 from ai.assistants.pdf_rag import get_rag_pdf_assistant, get_agent_rag_pdf_assistant
 from ai.assistants.pdf_auto import get_autonomous_pdf_assistant
@@ -28,15 +26,21 @@ def get_agent_assistant(
     agent_collection_name: str = None,
     website_urls: Optional[List[str]] = None,
     pdf_urls: Optional[List[str]] = None,
-    prompt: str = None,
+    property: Any = None
 ):
     """Return the assistant"""
-    print(website_urls)
     if assistant_type == "AUTO_PDF":
         return get_autonomous_pdf_assistant(run_id=run_id, user_id=user_id)
     elif assistant_type == "RAG_PDF":
-        return get_agent_rag_pdf_assistant(run_id=run_id, user_id=user_id, agent_collection_name=agent_collection_name, website_urls=website_urls,pdf_urls=pdf_urls,prompt=prompt)
+        return get_agent_rag_pdf_assistant(run_id=run_id, user_id=user_id, agent_collection_name=agent_collection_name, website_urls=website_urls,pdf_urls=pdf_urls,property=property)
 
+
+class Property:
+    prompt: Optional[str]
+    description: Optional[str]
+    instructions: Optional[List[str]]
+    extra_instructions: Optional[List[str]]
+    expected_output: str
 
 
 class LoadAgentKnowledgeBaseRequest(BaseModel):
@@ -44,19 +48,19 @@ class LoadAgentKnowledgeBaseRequest(BaseModel):
     agent_collection_name: str
     website_urls: List[str]
     pdf_urls: List[str]
-    prompt: str
+    property: Any
 
 
 
 @assistants_router.post("/load-agent-knowledge-base")
 def load_agent_knowledge_base(body: LoadAgentKnowledgeBaseRequest):
     """Loads the knowledge base for an Assistant"""
-    print(body)
+    print(body.property)
     assistant = get_agent_assistant(assistant_type=body.assistant,
                                     agent_collection_name=body.agent_collection_name,
                                     website_urls=body.website_urls,
                                     pdf_urls=body.pdf_urls,
-                                    prompt=body.prompt
+                                    property=body.property
                                     )
     if assistant.knowledge_base:
         assistant.knowledge_base.load(recreate=False)
@@ -68,7 +72,7 @@ class CreateRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
-    prompt: str
+    property: Any
 
 
 class CreateRunResponse(BaseModel):
@@ -85,7 +89,7 @@ def create_assistant_run(body: CreateRunRequest):
     assistant: Assistant = get_agent_assistant(assistant_type=body.assistant, 
                                                user_id=body.user_id,
                                                agent_collection_name=body.agent_collection_name,
-                                               prompt=body.prompt
+                                               property=body.property
                                                )
     # create_run() will log the run in the database and return the run_id
     # which is returned to the frontend to retrieve the run later
@@ -112,7 +116,7 @@ class ChatRequest(BaseModel):
     run_id: Optional[str] = None
     user_id: Optional[str] = None
     agent_collection_name: Optional[str] = None
-    prompt: str
+    property: Any
     assistant: AssistantType = "RAG_PDF"
 
 
@@ -129,7 +133,7 @@ def chat(body: ChatRequest):
         run_id=body.run_id, 
         user_id=body.user_id,
         agent_collection_name=body.agent_collection_name,
-        prompt=body.prompt
+        property=body.property
     )
     
 
@@ -147,7 +151,7 @@ class ChatHistoryRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
-    prompt: str
+    property: str
 
 
 @assistants_router.post("/history", response_model=List[Dict[str, Any]])
@@ -160,7 +164,7 @@ def get_chat_history(body: ChatHistoryRequest):
         run_id=body.run_id, 
         user_id=body.user_id,
         agent_collection_name=body.agent_collection_name,
-        prompt=body.prompt
+        property=body.property
     )
     # Load the assistant from the database
     assistant.read_from_storage()
@@ -173,7 +177,7 @@ class GetAssistantRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
-    prompt: str
+    property: str
     
 
 
@@ -187,7 +191,7 @@ def get_assistant_run(body: GetAssistantRunRequest):
         run_id=body.run_id, 
         user_id=body.user_id,
         agent_collection_name=body.agent_collection_name,
-        prompt=body.prompt
+        property=body.property
     )
 
     return assistant.read_from_storage()
@@ -223,7 +227,7 @@ class RenameAssistantRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
-    prompt: str
+    property: str
 
 
 class RenameAssistantRunResponse(BaseModel):
@@ -241,7 +245,7 @@ def rename_assistant(body: RenameAssistantRunRequest):
         run_id=body.run_id, 
         user_id=body.user_id,
         agent_collection_name=body.agent_collection_name,
-        prompt=body.prompt
+        property=body.property
     )
     assistant.rename_run(body.run_name)
 
@@ -256,7 +260,7 @@ class AutoRenameAssistantRunRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
-    prompt: str
+    property: str
 
 
 class AutoRenameAssistantRunResponse(BaseModel):
@@ -274,7 +278,7 @@ def autorename_assistant(body: AutoRenameAssistantRunRequest):
         run_id=body.run_id, 
         user_id=body.user_id,
         agent_collection_name=body.agent_collection_name,
-        prompt=body.prompt
+        property=body.property
     )
     assistant.auto_rename_run()
 
