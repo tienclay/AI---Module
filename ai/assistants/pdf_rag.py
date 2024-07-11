@@ -165,7 +165,6 @@ def get_agent_rag_pdf_assistant(
     property: Any = None,
 ) -> Assistant:
     """Get a RAG Assistant with a PDF knowledge base."""
-
     return Assistant(
         name="rag_pdf_assistant",
         run_id=run_id,

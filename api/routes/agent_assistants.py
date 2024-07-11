@@ -151,7 +151,7 @@ class ChatHistoryRequest(BaseModel):
     user_id: Optional[str] = None
     assistant: AssistantType = "RAG_PDF"
     agent_collection_name: Optional[str] = None
-    property: str
+    property: Any
 
 
 @assistants_router.post("/history", response_model=List[Dict[str, Any]])
