@@ -165,6 +165,7 @@ def get_agent_rag_pdf_assistant(
     property: Any = None,
 ) -> Assistant:
     """Get a RAG Assistant with a PDF knowledge base."""
+    
     return Assistant(
         name="rag_pdf_assistant",
         run_id=run_id,
@@ -183,10 +184,10 @@ def get_agent_rag_pdf_assistant(
         # Enable monitoring on phidata.app
         # monitoring=True,
         debug_mode=debug_mode,
-        prompt=getattr(property, 'prompt', None),
-        description=getattr(property, 'description', None),
-        extra_instructions=getattr(property, 'extra_instructions', None),
-        instructions=getattr(property, 'instructions', None),
-        expected_output=getattr(property, 'expected_output', None),
+        prompt=property['prompt'] if 'prompt' in property else None,
+        description=property['description'] if 'description' in property else None,
+        extra_instructions= property['extra_instructions'] if 'extra_instructions' in property else None,
+        instructions=property['instructions'] if 'instructions' in property else None,
+        expected_output=property['expected_output'] if 'expected_output' in property else None,
         assistant_data={"assistant_type": "rag"},
     )
