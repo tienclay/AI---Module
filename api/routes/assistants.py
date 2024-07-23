@@ -6,7 +6,7 @@ from phi.assistant import Assistant, AssistantRun
 from pydantic import BaseModel
 
 from api.routes.endpoints import endpoints
-from ai.assistants.pdf_rag import get_rag_pdf_assistant, get_agent_rag_pdf_assistant
+from ai.assistants.pdf_rag import get_rag_pdf_assistant
 from ai.assistants.pdf_auto import get_autonomous_pdf_assistant
 from ai.storage import pdf_assistant_storage
 from utils.log import logger
@@ -36,15 +36,15 @@ def get_agent_assistant(
     assistant_type: AssistantType,
     run_id: Optional[str] = None,
     user_id: Optional[str] = None,
-    agent_collection_name: str = None,
-    urls: List[str] = None,
+    agent_collection_name: Optional[str] = None,
+    urls: Optional[List[str]] = None,
 ):
     """Return the assistant"""
 
     if assistant_type == "AUTO_PDF":
         return get_autonomous_pdf_assistant(run_id=run_id, user_id=user_id)
     elif assistant_type == "RAG_PDF":
-        return get_agent_rag_pdf_assistant(run_id=run_id, user_id=user_id, agent_collection_name=agent_collection_name, urls=urls)
+        return get_rag_pdf_assistant(run_id=run_id, user_id=user_id)
 
 
 

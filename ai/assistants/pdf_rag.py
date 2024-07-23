@@ -11,7 +11,7 @@ from ai.knowledge_base import pdf_knowledge_base, load_agent_knowledge_base
 def get_rag_pdf_assistant(
     run_id: Optional[str] = None,
     user_id: Optional[str] = None,
-    debug_mode: bool = False,
+    debug_mode: bool = True,
 ) -> Assistant:
     """Get a RAG Assistant with a PDF knowledge base."""
 
@@ -152,14 +152,15 @@ Once the parsing is complete, provide the extracted data in the structured forma
             
         ],
         assistant_data={"assistant_type": "rag"},
+       
     )
 
 
 def get_agent_rag_pdf_assistant(
     run_id: Optional[str] = None,
     user_id: Optional[str] = None,
-    debug_mode: bool = False,
-    agent_collection_name: str = 'codelight_agent',
+    debug_mode: bool = True,
+    agent_collection_name: Optional[str] = None,
     website_urls: List[str] = [],
     pdf_urls: List[str] = [],
     property: Any = None,
@@ -186,7 +187,8 @@ def get_agent_rag_pdf_assistant(
         debug_mode=debug_mode,
         prompt=property['prompt'] if 'prompt' in property else None,
         description=property['description'] if 'description' in property else None,
-        extra_instructions= property['extra_instructions'] if 'extra_instructions' in property else None,
+        # extra_instructions= property['extra_instructions'] if 'extra_instructions' in property else None,
+        extra_instructions=["Respond under 15 seconds."],
         instructions=property['instructions'] if 'instructions' in property else None,
         expected_output=property['expected_output'] if 'expected_output' in property else None,
         assistant_data={"assistant_type": "rag"},
