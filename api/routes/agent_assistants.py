@@ -1,11 +1,11 @@
-from typing import Generator, Optional, List, Dict, Any, Literal, Tuple, Type
+from typing import Generator, Optional, List, Dict, Any, Literal
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from phi.assistant import Assistant, AssistantRun
 from pydantic import BaseModel
 from api.routes.endpoints import endpoints
-from ai.assistants.pdf_rag import get_rag_pdf_assistant, get_agent_rag_pdf_assistant
-from ai.assistants.pdf_auto import get_autonomous_pdf_assistant, get_agent_autonomous_pdf_assistant
+from ai.assistants.pdf_rag import get_agent_rag_pdf_assistant
+from ai.assistants.pdf_auto import get_agent_autonomous_pdf_assistant
 from ai.storage import pdf_assistant_storage
 from utils.log import logger
 
@@ -23,9 +23,9 @@ def get_agent_assistant(
     assistant_type: AssistantType,
     run_id: Optional[str] = None,
     user_id: Optional[str] = None,
-    agent_collection_name: str = None,
-    website_urls: Optional[List[str]] = None,
-    pdf_urls: Optional[List[str]] = None,
+    agent_collection_name: Optional[str] = None,
+    website_urls: List[str] = [],
+    pdf_urls: List[str] = [],
     property: Any = None
 ):
     print(property)

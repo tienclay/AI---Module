@@ -160,7 +160,7 @@ def get_agent_rag_pdf_assistant(
     run_id: Optional[str] = None,
     user_id: Optional[str] = None,
     debug_mode: bool = True,
-    agent_collection_name: str = 'codelight_agent',
+    agent_collection_name: Optional[str] = None,
     website_urls: List[str] = [],
     pdf_urls: List[str] = [],
     property: Any = None,
