@@ -6,7 +6,7 @@ from phi.llm.openai import OpenAIChat
 from ai.settings import ai_settings
 from ai.storage import pdf_assistant_storage
 from ai.knowledge_base import pdf_knowledge_base,load_agent_knowledge_base
-
+from phi.llm.together import Together
 
 def get_autonomous_pdf_assistant(
     run_id: Optional[str] = None,
@@ -70,6 +70,7 @@ def get_agent_autonomous_pdf_assistant(
     website_urls: List[str] = [],
     pdf_urls: List[str] = [],
     property: Any = None,
+    
 ) -> Assistant:
     """Get a RAG Assistant with a PDF knowledge base."""
     
@@ -79,6 +80,50 @@ def get_agent_autonomous_pdf_assistant(
         user_id=user_id,
         llm=OpenAIChat(
             model=ai_settings.gpt_4,
+            max_tokens=ai_settings.default_max_tokens,
+            temperature=ai_settings.default_temperature,
+        ),
+        storage=pdf_assistant_storage,
+        knowledge_base=load_agent_knowledge_base(agent_collection_name,website_urls, pdf_urls),
+        
+        # Show tool calls in the response
+        show_tool_calls=True,
+        # Enable the assistant to search the knowledge base
+        search_knowledge=True,
+        # Enable the assistant to read the chat history
+        read_chat_history=True,
+        # Enable monitoring on phidata.app
+        # monitoring=True,
+        debug_mode=debug_mode,
+        prompt=property['prompt'] if 'prompt' in property else None,
+        description=property['description'] if 'description' in property else "You are an assistant",
+        # extra_instructions= property['extra_instructions'] if 'extra_instructions' in property else None,
+        extra_instructions=[
+            "Keep your answers under 3 sentences.",
+        ],
+        instructions=property['instructions'] if 'instructions' in property else None,
+        expected_output=property['expected_output'] if 'expected_output' in property else None,
+        assistant_data={"assistant_type": "rag"},
+    )
+    
+def get_agent_autonomous_pdf_assistant_together(
+    run_id: Optional[str] = None,
+    user_id: Optional[str] = None,
+    debug_mode: bool = True,
+    agent_collection_name: Optional[str]= None,
+    website_urls: List[str] = [],
+    pdf_urls: List[str] = [],
+    property: Any = None,
+    model: str = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+) -> Assistant:
+    """Get a RAG Assistant with a PDF knowledge base."""
+    
+    return Assistant(
+        name="rag_pdf_assistant",
+        run_id=run_id,
+        user_id=user_id,
+        llm=Together(
+            model=model,
             max_tokens=ai_settings.default_max_tokens,
             temperature=ai_settings.default_temperature,
         ),
