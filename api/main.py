@@ -4,7 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from api.settings import api_settings
 from api.routes.v1_router import v1_router
-
+import os
 
 def create_app() -> FastAPI:
     """Create a FastAPI App
@@ -12,6 +12,14 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI: FastAPI App
     """
+    
+    
+    
+    key_value = os.getenv('OPENAI_API_KEY')
+    
+    key2 = os.getenv('TOGETHER_API_KEY')
+  
+
 
     # Create FastAPI App
     app: FastAPI = FastAPI(

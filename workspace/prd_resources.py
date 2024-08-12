@@ -174,6 +174,7 @@ container_env = {
     "RUNTIME_ENV": "prd",
     # Get the OpenAI API key from the local environment
     "OPENAI_API_KEY": getenv("OPENAI_API_KEY"),
+    "TOGETHER_API_KEY": getenv("TOGETHER_API_KEY"),
     # Database configuration
     "DB_HOST": AwsReference(prd_db.get_db_endpoint),
     "DB_PORT": AwsReference(prd_db.get_db_port),

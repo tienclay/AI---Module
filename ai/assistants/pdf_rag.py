@@ -6,7 +6,7 @@ from phi.llm.openai import OpenAIChat
 from ai.settings import ai_settings
 from ai.storage import pdf_assistant_storage
 from ai.knowledge_base import pdf_knowledge_base, load_agent_knowledge_base
-
+from phi.tools.duckduckgo import DuckDuckGo
 
 def get_rag_pdf_assistant(
     run_id: Optional[str] = None,
@@ -182,9 +182,12 @@ def get_agent_rag_pdf_assistant(
         add_references_to_prompt=True,
         # This setting adds the last 6 messages from the chat history to the API call
         add_chat_history_to_messages=True,
+        num_history_messages = 50,
         # Enable monitoring on phidata.app
         # monitoring=True,
         debug_mode=debug_mode,
+        tools=[DuckDuckGo()],
+        show_tool_calls=True,
         prompt=property['prompt'] if 'prompt' in property else None,
         description=property['description'] if 'description' in property else None,
         # extra_instructions= property['extra_instructions'] if 'extra_instructions' in property else None,
