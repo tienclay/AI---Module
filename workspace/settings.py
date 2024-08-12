@@ -38,5 +38,5 @@ ws_settings = WorkspaceSettings(
     # Repository for the image
     # image_repo="phidata",
     # Build images locally
-    # build_images=True,
+    build_images=True,
 )

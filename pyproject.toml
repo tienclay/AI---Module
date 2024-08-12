@@ -17,6 +17,7 @@ dependencies = [
   "sqlalchemy",
   # Project libraries
   "openai",
+  "duckduckgo-search",
   "pypdf",
   "streamlit",
   "tiktoken",

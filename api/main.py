@@ -12,6 +12,12 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI: FastAPI App
     """
+    
+    
+    
+  
+  
+
 
     # Create FastAPI App
     app: FastAPI = FastAPI(
