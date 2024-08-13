@@ -182,7 +182,7 @@ def get_agent_rag_pdf_assistant(
         add_references_to_prompt=True,
         # This setting adds the last 6 messages from the chat history to the API call
         add_chat_history_to_messages=True,
-        num_history_messages = 50,
+        num_history_messages = 1000,
         # Enable monitoring on phidata.app
         # monitoring=True,
         debug_mode=debug_mode,
