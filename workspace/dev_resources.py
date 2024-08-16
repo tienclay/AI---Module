@@ -30,7 +30,7 @@ dev_db = PgVectorDb(
     pg_password="app",
     pg_database="app",
     # Connect to this db on port 5432
-    host_port=5432,
+    host_port=getenv("DB_PORT"),
 )
 
 # -*- Build container environment
@@ -57,7 +57,7 @@ dev_streamlit = Streamlit(
     enabled=ws_settings.dev_app_enabled,
     image=dev_image,
     command="streamlit run app/Home.py",
-    port_number=8501,
+    port_number=getenv("APP_PORT"),
     debug_mode=True,
     mount_workspace=True,
     streamlit_server_headless=True,
@@ -74,7 +74,7 @@ dev_fastapi = FastApi(
     enabled=ws_settings.dev_api_enabled,
     image=dev_image,
     command="uvicorn api.main:app --reload",
-    port_number=8000,
+    port_number=getenv("AI_API_PORT"),
     debug_mode=True,
     mount_workspace=True,
     env_vars=container_env,
